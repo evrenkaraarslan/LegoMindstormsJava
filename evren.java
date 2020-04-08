@@ -37,7 +37,8 @@ public static void main(String args[]) throws InterruptedException {
 		int sensorValue = lightSensor.readNormalizedValue()/10; //light value
 		if(sensorValue > 60) sensorValue = 20; //discard sensor saturation
 		Thread.sleep(40);
-		if(!flagInit){ //initial section
+		if(!flagInit)
+		{ //initial section
 			LCD.drawString("Sensor value: " + sensorValue, 0, 6);
 			LCD.drawString("initial section", 0, 1);
 			LCD.drawString("is executing..", 0, 2);
@@ -50,19 +51,20 @@ public static void main(String args[]) throws InterruptedException {
 // The light sensor should detect a fall from line to ground to end initial section
 			prevSens = sensorValue;  // update previous sensor value
 		}
-		else if (!flagLine){ //line following section
+		else if (!flagLine)
+		{ //line following section
 			int dist = sonic.getDistance(); //distance from ultrasonic sensor
 			LCD.drawString("Sensor value: " + sensorValue, 0, 6);
 			LCD.drawString("distance:   " + dist, 0, 3);
 			LCD.refresh(); 
 			if (dist<20) flagLine = true; 
-// An object should be detected to end the line following section
+                        // An object should be detected to end the line following section
 			LCD.drawString("line f section   ", 0, 1);
 			LCD.refresh();
 			LCD.drawString("Sensor value: " + sensorValue, 0, 6);   
 			int error = sensorValue - offset; // to find light error in each cycle
 			int difError = prevError - error;  // error differentiator
-prevError = error; // update previous error value
+                        prevError = error; // update previous error value
 			integral = integral + error; // integral action
 			LCD.drawString("Error: " + error, 0, 4);
 			LCD.drawString("Integral: " + integral, 0, 5);
@@ -81,13 +83,14 @@ prevError = error; // update previous error value
 			else Motor.B.forward();
 			Motor.B.setSpeed(powerB);
 		}
-		else if(!flagAfterLine){ //wall alignment section
+		else if(!flagAfterLine)
+		{ //wall alignment section
 			LCD.drawString("line f section   ", 0, 1);
 			LCD.drawString("is finished..   ", 0, 2);
 			LCD.drawString("Sensor value: " + sensorValue, 0, 6);
 			LCD.refresh();
 			Motor.A.setSpeed(200); // back speed for right motor
-            Motor.B.setSpeed(200); // back speed for left motor
+                        Motor.B.setSpeed(200); // back speed for left motor
 			Motor.A.backward();
 			Motor.B.backward();
 			Thread.sleep(1500); // go back for 1.5 secs
@@ -109,12 +112,14 @@ prevError = error; // update previous error value
 			prevSens = 0; // set down previous light sensor value
 			flagAfterLine = true; // end of section
 		}
-        else if(!flagInter){ //wall following section
+        else if(!flagInter)
+	{ //wall following section
 				LCD.drawString("looking for   ", 0, 1);
 				LCD.drawString("obstacle area ", 0, 2);
 				LCD.refresh();
 				int cumSensor = 0;
-				for (int cnt=0;cnt<filterSize;cnt++){
+				for (int cnt=0;cnt<filterSize;cnt++)
+				{
 					int white = sonic.getDistance(); //read white value
 					cumSensor = cumSensor + white;
 				} // filters distance reading values
@@ -135,18 +140,19 @@ prevError = error; // update previous error value
 				Motor.A.setSpeed(powerA);
 				Motor.B.setSpeed(powerB);
 				if((prevSens>48)&&(prevSens - sensorValue> 3) // obstacle area
-{
+                                {
 					wInteg = 0; // setting down integrator
 					Motor.A.setSpeed(100); // slow down for right motor
 					Motor.B.setSpeed(100); // slow down for left motor
 					Motor.C.rotateTo(0); // turn Ultrasonic sensor forward
 					flagInter = true; // end of section
 					LCD.clear(); 
-			}
+			        }
 prevSens = sensorValue;
 posA = Motor.A.getPosition();//getting initial position from motor A		posB = Motor.B.getPosition();//getting initial position from motor B
 }
-        else if(!flagObst){ //obstacle seeking section
+        else if(!flagObst)
+	{ //obstacle seeking section
 				LCD.drawString("look for     ", 0, 1);
 				LCD.drawString("an obstacle ", 0, 2);
 				int dist = sonic.getDistance(); // get distance value from Ultrasonic sensor
@@ -157,18 +163,18 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
 				Motor.A.forward(); // go forward
 				Motor.B.forward();
 				odoTh = odoTh + 275 * (Motor.A.getPosition() - posA + posB - Motor.B.getPosition()); // calculate direction odometry
-                LCD.drawString("Theta: " + odoTh, 0, 4);
+                                LCD.drawString("Theta: " + odoTh, 0, 4);
 				double Ds = 27.5 * 3.14 * (Motor.A.getPosition() - posA + Motor.B.getPosition() - posB) / 360; // calculate elongational distance
 				odoY = odoY + 1000 * Math.round(Ds); // update Y odometry
-                LCD.drawString("Y:  " + odoY, 0, 6);
+                                LCD.drawString("Y:  " + odoY, 0, 6);
 				LCD.refresh();
 				posA = Motor.A.getPosition(); // get position of right motor
 				posB = Motor.B.getPosition(); // get position of left motor
 				if(dist<22) //Obstacle detected
-{   
+                                {   
 					Motor.A.stop(); // stop motors
 					Motor.B.stop();
-                    Motor.C.rotateTo(-90); // ultrasonic sensor rotates 90 deg towards to obstacle 
+                                        Motor.C.rotateTo(-90); // ultrasonic sensor rotates 90 deg towards to obstacle 
 					Motor.A.setSpeed(100);
 					Motor.B.setSpeed(100);
 					Motor.A.backward();
@@ -176,7 +182,7 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
 					LCD.drawString("odo:   " + odoTh, 0, 4);
 					LCD.refresh();
 					while ((odoTh > -90000)) //robot rotates 90deg. to right
-                    {
+                                        {
 						LCD.drawString("odo:   " + odoTh, 0, 4);
 						LCD.refresh();
 						Thread.sleep(88);
@@ -195,7 +201,7 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
 					posB = Motor.B.getPosition(); // get position of left motor
 				    }
 				if((prevSens>46)&&((prevSens-sensorValue)>2)&&(odoY>0)) 
-                {// reaches to end point
+                                {// reaches to end point
 					LCD.clear();
 					LCD.drawString("MISSION   ", 0, 1);
 					LCD.drawString("COMPLETED  ", 0, 2);
@@ -208,14 +214,15 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
                 }
 				prevSens = sensorValue; // update previous light sensor value
 			}
-			else if(!obsDet) { //circumnavigationg the obstacle till absolute 0 angle
+			else if(!obsDet) 
+		        { //circumnavigationg the obstacle till absolute 0 angle
 				LCD.drawString("circumnavigate", 0, 1);
 				LCD.refresh();
 				Motor.A.forward(); // go forward
 				Motor.B.forward();
 				int cumSensor = 0;
 				for (int cnt=0;cnt<filterSize;cnt++) 
-                {
+                                {
 					int white = sonic.getDistance(); //read white value
 					cumSensor = cumSensor + white;
 				} //filtering distance values
@@ -235,19 +242,19 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
 				Motor.A.setSpeed(powerA);
 				Motor.B.setSpeed(powerB);
 				int Dth = 275 * (Motor.A.getPosition() - posA + posB - Motor.B.getPosition());// calculation of delta direction
-                LCD.drawString("Theta: " + odoTh, 0, 4); 
+                                LCD.drawString("Theta: " + odoTh, 0, 4); 
 				double Ds = 27.5 * 3.14 * (Motor.A.getPosition() - posA + Motor.B.getPosition() - posB) / 360; 
-                double ThRad = 3.14 * (odoTh/1000 + (Dth / 2000+90))/180;//angle in rad
+                                double ThRad = 3.14 * (odoTh/1000 + (Dth / 2000+90))/180;//angle in rad
 				long mmY = Math.round(1000*Math.sin(ThRad));
 				odoY = odoY + Math.round(Ds * mmY); //updating y odometry
-                odoTh = odoTh + Dth; //updating direction odometry
-                LCD.drawString("Y:  " + odoY, 0, 6);
+                                odoTh = odoTh + Dth; //updating direction odometry
+                                LCD.drawString("Y:  " + odoY, 0, 6);
 				posA = Motor.A.getPosition(); // get position of right motor
 				posB = Motor.B.getPosition(); // get position of left motor
                 if((obsDist > 22)&&(odoTh>0))
                 {//when robot reaches the absolute 0 angle and getting far from obstacle
 					if (odoTh > 10000)
-                    { // adjust absolute direction to zero
+                                        { // adjust absolute direction to zero
 						Motor.A.setSpeed(100);
 						Motor.B.setSpeed(100);
 						Motor.A.stop();
@@ -269,7 +276,7 @@ posA = Motor.A.getPosition();//getting initial position from motor A		posB = Mot
 					obsDet = true;//sets obstacle detection mode
 				}
 				if((prevSens>46)&&((prevSens - sensorValue) > 2)&&(odoY>0)) 
-                {// reaches to end point, code is as same before
+                                {// reaches to end point, code is as same before
 					LCD.clear();
 					LCD.drawString("MISSION   ", 0, 1);
 					LCD.drawString("COMPLETED  ", 0, 2);
